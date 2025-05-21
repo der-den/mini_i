@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="page-header">
+                <h1>Auto-Scanner</h1>
+            </div>
+            
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Barcode scannen und Lagerort aktualisieren</h3>
+                </div>
+                <div class="panel-body text-center">
+                    <form id="auto-scanner-form" method="post" role="form">
+                        <div class="row">
+                            <div class="col-md-6 col-md-offset-3">
+                                <div class="form-group">
+                                    <label for="storage" class="control-label">Storage (Pflichtfeld)</label>
+                                    <input type="number" id="storage" name="storage" class="form-control input-lg" 
+                                           placeholder="Storage..." value="{{ storage }}" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="storage_sub" class="control-label">Sub-Storage (Optional)</label>
+                                    <input type="text" id="storage_sub" name="storage_sub" class="form-control input-lg" 
+                                           placeholder="Sub-Storage..." value="{{ storage_sub }}">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="barcode" class="control-label">Barcode</label>
+                                    <div class="input-group input-group-lg">
+                                        <input type="text" id="barcode" name="barcode" class="form-control input-lg" 
+                                               placeholder="Barcode scannen..." maxlength="12" autofocus>
+                                        <span class="input-group-btn">
+                                            <button type="submit" class="btn btn-primary btn-lg">Aktualisieren</button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    {% if error %}
+                    <div class="alert alert-danger" style="max-width: 500px; margin: 20px auto;">
+                        {{ error }}
+                    </div>
+                    {% endif %}
+                    
+                    {% if success %}
+                    <div class="alert alert-success" style="max-width: 500px; margin: 20px auto;">
+                        {{ success }}
+                    </div>
+                    
+                    {% if item_data %}
+                    <div class="panel panel-success" style="max-width: 600px; margin: 20px auto;">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Gefundener Artikel</h3>
+                        </div>
+                        <div class="panel-body">
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th>AZ POL</th>
+                                    <td>{{ item_data.az_pol }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Ass. Number</th>
+                                    <td>{{ item_data.ass_number }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Type</th>
+                                    <td>{{ item_data.type }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Vendor</th>
+                                    <td>{{ item_data.vendor }}</td>
+                                </tr>
+                            </table>
+                            
+                            <div class="btn-group btn-group-justified" role="group">
+                                <a href="{{ url_for('detail', id=item_data.id) }}" class="btn btn-primary" target="_blank">
+                                    <span class="glyphicon glyphicon-edit"></span> Detailansicht
+                                </a>
+                                <a href="{{ url_for('index', search_param=1, az_pol=item_data.az_pol) }}" class="btn btn-info" target="_blank">
+                                    <span class="glyphicon glyphicon-list"></span> Alle mit gleichem AZ
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        $(document).ready(function() {
+            // Automatischer Fokus auf das Barcode-Eingabefeld
+            $('#barcode').focus();
+            
+            // Form-Handling
+            $('#auto-scanner-form').submit(function(e) {
+                var barcode = $('#barcode').val().trim();
+                var storage = $('#storage').val().trim();
+                
+                // Prüfe, ob der Barcode genau 12 Stellen hat
+                if (barcode.length !== 12 || !/^\d+$/.test(barcode)) {
+                    e.preventDefault();
+                    alert('Der Barcode muss genau 12 Ziffern enthalten.');
+                    $('#barcode').focus();
+                    return false;
+                }
+                
+                // Prüfe, ob Storage ausgefüllt ist
+                if (!storage) {
+                    e.preventDefault();
+                    alert('Storage ist ein Pflichtfeld.');
+                    $('#storage').focus();
+                    return false;
+                }
+            });
+            
+            // Barcode-Feld automatisch leeren nach erfolgreicher Suche
+            {% if success %}
+            $('#barcode').val('').focus();
+            {% endif %}
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Inventory Database</h1>
+            
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Search</h3>
+                </div>
+                <div class="panel-body">
+                    <form class="form" method="post" role="form">
+                        {{ form.hidden_tag() }}
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="input-group input-group-lg">
+                                    {{ form.search(class='form-control', placeholder='Search across all fields...') }}
+                                    <span class="input-group-btn">
+                                        {{ form.submit(class="btn btn-primary") }}
+                                        <a href="{{ url_for('index') }}" class="btn btn-default">Reset</a>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-right">
+                                <div class="checkbox">
+                                    <label style="font-size: 18px;">
+                                        {{ form.has_storage() }} Has Storage (Filter)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Results ({{ total_count }} items found)</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Actions</th>
+                                    {% for column in columns %}
+                                    <th>{{ header_mapping.get(column, column) }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('detail', id=item.id) }}" class="btn btn-xs btn-info" title="Edit" target="_blank">
+                                            <span class="glyphicon glyphicon-edit"></span>
+                                        </a>
+                                    </td>
+                                    {% for column in columns %}
+                                    <td>{{ item[column] }}</td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if total_pages > 1 %}
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            {% if page > 1 %}
+                            <li>
+                                <a href="{{ url_for('index', page=page-1, search_param=1, 
+                                           search=form.search.data,
+                                           has_storage=form.has_storage.data,
+                                           az_pol=request.args.get('az_pol', '')) }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for p in range(1, total_pages + 1) %}
+                                {% if p >= page - 2 and p <= page + 2 %}
+                                <li {% if p == page %}class="active"{% endif %}>
+                                    <a href="{{ url_for('index', page=p, search_param=1,
+                                               search=form.search.data,
+                                               has_storage=form.has_storage.data,
+                                               az_pol=request.args.get('az_pol', '')) }}">{{ p }}</a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page < total_pages %}
+                            <li>
+                                <a href="{{ url_for('index', page=page+1, search_param=1,
+                                           search=form.search.data,
+                                           has_storage=form.has_storage.data,
+                                           az_pol=request.args.get('az_pol', '')) }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,18 @@
+CREATE TABLE tabelle1 (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  az_pol TEXT,
+  place_status TEXT,
+  ass_number TEXT,
+  type TEXT,
+  vendor TEXT,
+  model TEXT,
+  model_desc TEXT,
+  status TEXT,
+  serial TEXT,
+  barcode INTEGER,
+  seized_by TEXT,
+  status_hint TEXT,
+  storage INTEGER,
+  storage_sub TEXT,
+  last_scanned DATE
+);

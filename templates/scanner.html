@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="page-header">
+                <h1>Barcode Scanner</h1>
+            </div>
+            
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Barcode scannen</h3>
+                </div>
+                <div class="panel-body text-center">
+                    <form id="scanner-form" method="post" role="form">
+                        <div class="form-group">
+                            <div class="input-group input-group-lg" style="max-width: 500px; margin: 0 auto;">
+                                <input type="text" id="barcode" name="barcode" class="form-control input-lg" 
+                                       placeholder="Barcode scannen..." maxlength="12" autofocus>
+                                <span class="input-group-btn">
+                                    <button type="submit" class="btn btn-primary btn-lg">Suchen</button>
+                                </span>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    {% if error %}
+                    <div class="alert alert-danger" style="max-width: 500px; margin: 20px auto;">
+                        {{ error }}
+                    </div>
+                    {% endif %}
+                    
+                    {% if success %}
+                    <div class="alert alert-success" style="max-width: 500px; margin: 20px auto;">
+                        {{ success }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        $(document).ready(function() {
+            // Automatischer Fokus auf das Barcode-Eingabefeld
+            $('#barcode').focus();
+            
+            // Form-Handling
+            $('#scanner-form').submit(function(e) {
+                var barcode = $('#barcode').val().trim();
+                
+                // Prüfe, ob der Barcode genau 12 Stellen hat
+                if (barcode.length !== 12 || !/^\d+$/.test(barcode)) {
+                    e.preventDefault();
+                    alert('Der Barcode muss genau 12 Ziffern enthalten.');
+                    $('#barcode').focus();
+                }
+            });
+            
+            // Barcode-Feld automatisch leeren nach erfolgreicher Suche
+            {% if success %}
+                $('#barcode').val('').focus();
+            {% endif %}
+            
+            // Weiterleitung zur Detailseite in neuem Tab, wenn ein Item gefunden wurde
+            {% if redirect_script and item_id %}
+                window.open('{{ url_for("detail", id=item_id) }}', '_blank');
+            {% endif %}
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="page-header">
+                <h1>
+                    Neuen Eintrag hinzufügen
+                    <div class="pull-right">
+                        <a href="{{ url_for('index') }}" class="btn btn-default">
+                            <span class="glyphicon glyphicon-arrow-left"></span> Zurück zur Liste
+                        </a>
+                    </div>
+                </h1>
+            </div>
+            
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-success" role="alert">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
+            
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Neuer Datensatz</h3>
+                </div>
+                <div class="panel-body" style="font-size: larger;">
+                    <form class="form-horizontal" method="post" role="form">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <!-- AZ_POL -->
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">{{ form.az_pol.label.text }}</label>
+                                    <div class="col-sm-8">{{ form.az_pol(class="form-control") }}</div>
+                                </div>
+                                
+                                <!-- Place Status -->
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">{{ form.place_status.label.text }}</label>
+                                    <div class="col-sm-8">{{ form.place_status(class="form-control") }}</div>
+                                </div>
+                                
+                                <!-- Ass. Number -->
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">{{ form.ass_number.label.text }}</label>
+                                    <div class="col-sm-8">{{ form.ass_number(class="form-control") }}</div>
+                                </div>
+                                
+                                <!-- Type -->
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">{{ form.type.label.text }}</label>
+                                    <div class="col-sm-8">{{ form.type(class="form-control") }}</div>
+                                </div>
+                                
+                                <!-- Vendor -->
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">{{ form.vendor.label.text }}</label>
+                                    <div class="col-sm-8">{{ form.vendor(class="form-control") }}</div>
+                                </div>
+                                
+                                <!-- Model -->
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">{{ form.model.label.text }}</label>
+                                    <div class="col-sm-8">{{ form.model(class="form-control") }}</div>
+                                </div>
+                                
+                                <!-- Serial -->
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">{{ form.serial.label.text }}</label>
+                                    <div class="col-sm-8">{{ form.serial(class="form-control") }}</div>
+                                </div>
+                                
+                                <!-- Barcode -->
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">{{ form.barcode.label.text }}</label>
+                                    <div class="col-sm-8">{{ form.barcode(class="form-control") }}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <!-- Model Description -->
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">{{ form.model_desc.label.text }}</label>
+                                    <div class="col-sm-8">{{ form.model_desc(class="form-control", rows=3) }}</div>
+                                </div>
+                                
+                                <!-- Status -->
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">{{ form.status.label.text }}</label>
+                                    <div class="col-sm-8">{{ form.status(class="form-control", rows=3) }}</div>
+                                </div>
+                                
+                                <!-- Seized By -->
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">{{ form.seized_by.label.text }}</label>
+                                    <div class="col-sm-8">{{ form.seized_by(class="form-control") }}</div>
+                                </div>
+                                
+                                <!-- Status Hint -->
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">{{ form.status_hint.label.text }}</label>
+                                    <div class="col-sm-8">{{ form.status_hint(class="form-control", rows=3) }}</div>
+                                </div>
+                                
+                                <!-- Storage -->
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">{{ form.storage.label.text }}</label>
+                                    <div class="col-sm-8">{{ form.storage(class="form-control", type="number") }}</div>
+                                </div>
+                                
+                                <!-- Storage Sub -->
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">{{ form.storage_sub.label.text }}</label>
+                                    <div class="col-sm-8">{{ form.storage_sub(class="form-control") }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="col-md-12 text-center">
+                                {{ form.submit(class="btn btn-primary btn-lg") }}
+                                <a href="{{ url_for('index') }}" class="btn btn-default btn-lg">Abbrechen</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block styles %}
+    {{ super() }}
+    <style>
+        /* Größere und fette Schrift für Eingabefelder */
+        .form-control {
+            font-size: 16px;
+            font-weight: bold;
+            height: auto;
+            padding: 10px;
+        }
+        
+        /* Größere Schrift für Labels */
+        .control-label {
+            font-size: 16px;
+            font-weight: bold;
+            text-align: right;
+            padding-top: 15px;
+        }
+        
+        /* Größere Schrift für Textareas */
+        textarea.form-control {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        /* Horizontales Formular-Layout */
+        .form-horizontal .form-group {
+            margin-bottom: 15px;
+        }
+        
+        /* Kompaktere Anzeige */
+        .form-group {
+            margin-bottom: 10px;
+        }
+    </style>
+{% endblock %}

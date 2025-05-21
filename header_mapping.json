@@ -1,0 +1,17 @@
+{
+    "id": "ID",
+    "az_pol": "AZ POL",
+    "place_status": "Place Status",
+    "ass_number": "Ass. Number",
+    "type": "Type",
+    "vendor": "Vendor",
+    "model": "Model",
+    "model_desc": "Description",
+    "status": "Status",
+    "serial": "Serial",
+    "barcode": "Barcode",
+    "seized_by": "Seized By",
+    "status_hint": "Status Hint",
+    "storage": "Storage",
+    "storage_sub": "Storage Sub"
+}
