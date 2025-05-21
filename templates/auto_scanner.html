@@ -17,14 +17,26 @@
                             <div class="col-md-6 col-md-offset-3">
                                 <div class="form-group">
                                     <label for="storage" class="control-label">Storage (Pflichtfeld)</label>
-                                    <input type="number" id="storage" name="storage" class="form-control input-lg" 
-                                           placeholder="Storage..." value="{{ storage }}" required>
+                                    <input type="number" id="storage" name="storage" class="form-control input-lg {% if session.release_mode %}bg-warning{% endif %}" 
+                                           placeholder="Storage..." value="{% if session.release_mode %}0{% else %}{{ storage }}{% endif %}" 
+                                           {% if session.release_mode %}readonly{% endif %} required>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="storage_sub" class="control-label">Sub-Storage (Optional)</label>
-                                    <input type="text" id="storage_sub" name="storage_sub" class="form-control input-lg" 
-                                           placeholder="Sub-Storage..." value="{{ storage_sub }}">
+                                    <input type="text" id="storage_sub" name="storage_sub" class="form-control input-lg {% if session.release_mode %}bg-warning{% endif %}" 
+                                           placeholder="Sub-Storage..." value="{% if session.release_mode %}{% else %}{{ storage_sub }}{% endif %}" 
+                                           {% if session.release_mode %}readonly{% endif %}>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <button type="button" id="release_button" class="btn {% if session.release_mode %}btn-danger{% else %}btn-warning{% endif %} btn-block btn-lg">
+                                        <span class="glyphicon glyphicon-log-out"></span> {% if session.release_mode %}Herausgabe aktiv{% else %}Herausgabe{% endif %}
+                                    </button>
+                                    <input type="hidden" id="release_mode" name="release_mode" value="{% if session.release_mode %}1{% else %}0{% endif %}">
+                                    <p class="help-block" id="release_info" style="display: {% if session.release_mode %}block{% else %}none{% endif %};">
+                                        <strong>Herausgabe-Modus aktiv:</strong> Storage wird auf 0 gesetzt, Status auf "Herausgegeben"
+                                    </p>
                                 </div>
                                 
                                 <div class="form-group">
@@ -102,10 +114,44 @@
             // Automatischer Fokus auf das Barcode-Eingabefeld
             $('#barcode').focus();
             
+            // Herausgabe-Button-Funktionalität
+            var releaseMode = false;
+            
+            $('#release_button').click(function() {
+                releaseMode = !releaseMode;
+                $('#release_mode').val(releaseMode ? '1' : '0');
+                
+                if(releaseMode) {
+                    // Herausgabe-Modus aktiviert
+                    $(this).removeClass('btn-warning').addClass('btn-danger');
+                    $(this).html('<span class="glyphicon glyphicon-log-out"></span> Herausgabe aktiv');
+                    $('#release_info').show();
+                    $('#storage').val('0').prop('readonly', true);
+                    $('#storage_sub').val('').prop('readonly', true);
+                    // Visuelles Feedback
+                    $('#storage, #storage_sub').addClass('bg-warning');
+                } else {
+                    // Herausgabe-Modus deaktiviert
+                    $(this).removeClass('btn-danger').addClass('btn-warning');
+                    $(this).html('<span class="glyphicon glyphicon-log-out"></span> Herausgabe');
+                    $('#release_info').hide();
+                    $('#storage').prop('readonly', false);
+                    $('#storage_sub').prop('readonly', false);
+                    // Visuelles Feedback entfernen
+                    $('#storage, #storage_sub').removeClass('bg-warning');
+                }
+            });
+            
+            // Prüfe bei Seitenladung, ob der Herausgabe-Modus aktiviert ist
+            if($('#release_mode').val() === '1') {
+                $('#release_button').click();
+            }
+            
             // Form-Handling
             $('#auto-scanner-form').submit(function(e) {
                 var barcode = $('#barcode').val().trim();
                 var storage = $('#storage').val().trim();
+                var releaseMode = $('#release_mode').val() === '1';
                 
                 // Prüfe, ob der Barcode genau 12 Stellen hat
                 if (barcode.length !== 12 || !/^\d+$/.test(barcode)) {
@@ -115,8 +161,8 @@
                     return false;
                 }
                 
-                // Prüfe, ob Storage ausgefüllt ist
-                if (!storage) {
+                // Prüfe, ob Storage ausgefüllt ist (außer im Herausgabe-Modus)
+                if (!releaseMode && !storage) {
                     e.preventDefault();
                     alert('Storage ist ein Pflichtfeld.');
                     $('#storage').focus();

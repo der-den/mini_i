@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from flask import Flask, render_template, request, redirect, url_for, flash, abort
+from flask import Flask, render_template, request, redirect, url_for, flash, abort, session
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms import StringField, BooleanField, SubmitField, SelectField, IntegerField, DateField, TextAreaField
@@ -337,6 +337,16 @@ def auto_scanner():
     success = None
     storage = request.form.get('storage', '')
     storage_sub = request.form.get('storage_sub', '')
+    
+    # Herausgabe-Modus aus dem Formular oder der Session holen
+    if request.method == 'POST':
+        release_mode = request.form.get('release_mode') == '1'
+        # Speichere den Modus in der Session
+        session['release_mode'] = release_mode
+    else:
+        # Hole den Modus aus der Session oder setze ihn auf False, wenn er nicht existiert
+        release_mode = session.get('release_mode', False)
+    
     item_data = None
     
     if request.method == 'POST':
@@ -345,8 +355,8 @@ def auto_scanner():
         # Validiere den Barcode
         if len(barcode) != 12 or not barcode.isdigit():
             error = 'Der Barcode muss genau 12 Ziffern enthalten.'
-        elif not storage:
-            error = 'Storage ist ein Pflichtfeld.'
+        elif not release_mode and not storage:
+            error = 'Storage ist ein Pflichtfeld, wenn der Herausgabe-Modus nicht aktiviert ist.'
         else:
             # Suche nach dem Barcode in der Datenbank
             # Entferne die letzte Ziffer (Prüfziffer) und führende Nullen
@@ -356,26 +366,42 @@ def auto_scanner():
             conn = get_db_connection()
             # Hole zusätzliche Informationen (AZ, Spurnummer, Typ, Vendor)
             item = conn.execute('SELECT id, az_pol, ass_number, type, vendor FROM tabelle1 WHERE barcode = ?', 
-                               (barcode_transformed,)).fetchone()
+                                (barcode_transformed,)).fetchone()
             
             if item:
-                # Aktualisiere den Datensatz mit den neuen Storage-Werten
                 try:
                     # Aktualisiere auch das last_scanned Feld mit dem aktuellen Datum
                     from datetime import date
                     today = date.today().strftime('%Y-%m-%d')
                     
-                    conn.execute(
-                        '''
-                        UPDATE tabelle1 SET 
-                            storage = ?, 
-                            storage_sub = ?,
-                            last_scanned = ?
-                        WHERE id = ?
-                        ''', (storage, storage_sub, today, item['id'])
-                    )
+                    if release_mode:
+                        # Im Herausgabe-Modus: Storage auf 0, Storage Sub auf NULL, Status auf "Herausgegeben"
+                        conn.execute(
+                            '''
+                            UPDATE tabelle1 SET 
+                                storage = 0, 
+                                storage_sub = NULL,
+                                place_status = 'Herausgegeben',
+                                status_hint = 'Herausgegeben',
+                                last_scanned = ?
+                            WHERE id = ?
+                            ''', (today, item['id'])
+                        )
+                        success = f'Barcode {barcode} gefunden und als HERAUSGEGEBEN markiert!'
+                    else:
+                        # Normaler Modus: Aktualisiere den Datensatz mit den neuen Storage-Werten
+                        conn.execute(
+                            '''
+                            UPDATE tabelle1 SET 
+                                storage = ?, 
+                                storage_sub = ?,
+                                last_scanned = ?
+                            WHERE id = ?
+                            ''', (storage, storage_sub, today, item['id'])
+                        )
+                        success = f'Barcode {barcode} gefunden und Lagerort aktualisiert!'
+                    
                     conn.commit()
-                    success = f'Barcode {barcode} gefunden und Lagerort aktualisiert!'
                     
                     # Speichere die Artikeldaten für die Anzeige
                     item_data = {

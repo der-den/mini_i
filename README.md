@@ -1,22 +1,4 @@
-# Inventardatenbank (mini_i)
 
-Eine Webanwendung zur Verwaltung von Asservaten und Inventardaten.
-
-## Funktionen
-
-- Durchsuchen und Filtern der Inventardatenbank
-- Detailansicht für einzelne Einträge mit Bearbeitungsmöglichkeit
-- Scanner-Seite für Barcode-Scans
-- Dropdown-Menüs für Place Status und Type
-- Schreibschutz-Funktionalität für wichtige Felder
-- Filterung nach Aktenzeichen
-
-## Technologie
-
-- Python mit Flask als Web-Framework
-- SQLite-Datenbank
-- Bootstrap für das Frontend
-- JavaScript für interaktive Elemente
 
 ## Installation
 
