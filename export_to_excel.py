@@ -46,7 +46,7 @@ def get_header_mapping():
         'last_scanned': 'Last Scanned'
     }
 
-def export_to_excel(db_path, output_file, query=None, sheet_name='Inventar'):
+def export_to_excel(db_path, output_file, query=None, params=None, sheet_name='Inventar'):
     """
     Exportiert Daten aus der SQLite-Datenbank in eine Excel-Datei
     
@@ -54,6 +54,7 @@ def export_to_excel(db_path, output_file, query=None, sheet_name='Inventar'):
         db_path (str): Pfad zur SQLite-Datenbank
         output_file (str): Pfad zur Ausgabe-Excel-Datei
         query (str, optional): Benutzerdefinierte SQL-Abfrage
+        params (list, optional): Parameter für die SQL-Abfrage
         sheet_name (str, optional): Name des Excel-Tabellenblatts
     """
     try:
@@ -65,7 +66,10 @@ def export_to_excel(db_path, output_file, query=None, sheet_name='Inventar'):
             query = "SELECT * FROM tabelle1"
         
         # Daten in ein DataFrame laden
-        df = pd.read_sql_query(query, conn)
+        if params:
+            df = pd.read_sql_query(query, conn, params=params)
+        else:
+            df = pd.read_sql_query(query, conn)
         
         # Verbindung schließen
         conn.close()
@@ -128,6 +132,8 @@ def main():
     
     # SQL-Abfrage erstellen
     query = args.query
+    params = None
+    
     if query is None:
         query = "SELECT * FROM tabelle1 WHERE 1=1"
         params = []
@@ -157,13 +163,12 @@ def main():
             query += " AND az_pol = ?"
             params.append(args.az)
         
-        # Parameter in die Abfrage einfügen
-        conn = get_db_connection(args.db)
-        query = conn.execute(query, params).fetchall()
-        conn.close()
+        # Wenn keine Parameter gesetzt wurden, params auf None setzen
+        if not params:
+            params = None
     
     # Export durchführen
-    success = export_to_excel(args.db, args.out, query, args.sheet)
+    success = export_to_excel(args.db, args.out, query, params, args.sheet)
     if not success:
         sys.exit(1)
 
